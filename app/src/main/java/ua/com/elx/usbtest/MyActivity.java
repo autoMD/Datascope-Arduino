@@ -7,8 +7,6 @@ import android.hardware.usb.UsbManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
-import android.view.DragEvent;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -23,7 +21,6 @@ import android.widget.TextView;
 import com.hoho.android.usbserial.driver.UsbSerialDriver;
 import com.hoho.android.usbserial.driver.UsbSerialPort;
 import com.hoho.android.usbserial.driver.UsbSerialProber;
-import com.hoho.android.usbserial.util.HexDump;
 import com.hoho.android.usbserial.util.SerialInputOutputManager;
 
 import java.io.IOException;
@@ -95,7 +92,11 @@ public class MyActivity extends Activity {
         UsbManager manager = (UsbManager) getSystemService(Context.USB_SERVICE);
         List<UsbSerialDriver> availableDrivers = UsbSerialProber.getDefaultProber().findAllDrivers(manager);
         if (availableDrivers.isEmpty()) {
-            addLine("no drivers available, exit...");
+            addLine("no drivers available, using emulation");
+            // send some dummy bytes to the graph
+            byte dummy [] = generateDummyBuffer(4096);
+            updateReceivedData(dummy);
+
             return;
         }
 
@@ -120,7 +121,7 @@ public class MyActivity extends Activity {
     }
 
     private Handler customHandler = new Handler();
-    private RealtimeChartSurfaceView glChart;
+    private GraphView glChart;
     private LinearLayout glChartContainer;
     Timer t = new Timer();
    // float[] dataMin = new float[SignalChart.CHART_POINT];
@@ -140,7 +141,7 @@ public class MyActivity extends Activity {
         openPort();
 
         glChartContainer = (LinearLayout) findViewById(R.id.chartContainer);
-        glChart = new RealtimeChartSurfaceView(this,this);
+        glChart = new GraphView(this,this);
         glChartContainer.addView(glChart, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         glChartContainer.setVisibility(View.VISIBLE);
         //Set the schedule function and rate
@@ -329,9 +330,9 @@ public class MyActivity extends Activity {
     private int RX_LEN = 4*1000000;
     private int [] rxbuffer = new int[RX_LEN];
     private void updateReceivedData(byte[] data) {
-        //final String message = HexDump.dumpHexString(data);
-       // addLine(message);
-        //mScrollView.smoothScrollTo(0, mTextView.getBottom());
+
+        // data receive callback
+
         if (stopped) return;
         for (int i=0;i<data.length;i++) {
 
@@ -386,8 +387,6 @@ public class MyActivity extends Activity {
 
     private void generateBuffers() {
 
-
-
         int start_point = offset_to_pix(offset);
         int end_point = start_point + SignalChart.CHART_POINT ;
 
@@ -401,8 +400,19 @@ public class MyActivity extends Activity {
         back.block = 2*secondBufferStart / SignalChart.CHART_POINT;
         int i;
 
-        Log.e(TAG,String.format("main.block= %d back.block=%d",main.block,back.block));
+       // Log.e(TAG,String.format("main.block= %d back.block=%d",main.block,back.block));
 
+
+    }
+
+    private byte[] generateDummyBuffer(int len) {
+
+        byte [] dummy = new byte[len];
+        for (int i=0;i<len;i++) {
+            int z = i & 0x7f;
+            dummy[i] = (byte)z;
+        }
+        return dummy;
 
     }
 

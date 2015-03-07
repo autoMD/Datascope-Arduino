@@ -6,10 +6,10 @@ import android.opengl.GLSurfaceView;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 
-public class RealtimeChartSurfaceView extends GLSurfaceView{
+public class GraphView extends GLSurfaceView{
 
     private static final int INVALID_POINTER_ID = -1;
-    public RealtimeChartRenderer chartRenderer;
+    public GLGraphRender chartRenderer;
     //private float[] dataMin = new float[SignalChart.CHART_POINT];
     //private float[] dataMax = new float[SignalChart.CHART_POINT];
     DisplayBuffer main = new DisplayBuffer();
@@ -27,7 +27,7 @@ public class RealtimeChartSurfaceView extends GLSurfaceView{
 
     private ScaleGestureDetector mScaleDetector;
 
-    public RealtimeChartSurfaceView(Context context,MyActivity act) {
+    public GraphView(Context context, MyActivity act) {
         super(context);
 
         parent = act;
@@ -35,7 +35,7 @@ public class RealtimeChartSurfaceView extends GLSurfaceView{
         this.setZOrderOnTop(true); //necessary
         getHolder().setFormat(PixelFormat.TRANSLUCENT);
         // Set the Renderer for drawing on the GLSurfaceView
-        chartRenderer = new RealtimeChartRenderer(context);
+        chartRenderer = new GLGraphRender(context);
         setRenderer(chartRenderer);
         for (int i = 0; i < main.dataMin.length; i++){
             main.dataMin[i] = 0.0f;
@@ -120,6 +120,7 @@ public class RealtimeChartSurfaceView extends GLSurfaceView{
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
+        // Process touch events from surface
         // MotionEvent reports input details from the touch screen
         // and other input controls. In this case, you are only
         // interested in events where the touch position changed.

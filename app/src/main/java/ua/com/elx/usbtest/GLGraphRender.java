@@ -13,7 +13,7 @@ import android.opengl.GLU;
 import android.util.Log;
 
 
-public class  RealtimeChartRenderer implements Renderer {
+public class GLGraphRender implements Renderer {
 
     public SignalChart sineChart,backChart;
     public Grid grid;
@@ -28,7 +28,7 @@ public class  RealtimeChartRenderer implements Renderer {
     public double momentum=0;
     public double offset=0,offset_filtered=0;
     /** Constructor */
-    public RealtimeChartRenderer(Context context) {
+    public GLGraphRender(Context context) {
         this.sineChart = new SignalChart();
         this.backChart = new SignalChart();
         this.context = context;
